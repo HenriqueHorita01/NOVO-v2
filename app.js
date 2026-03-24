@@ -121,6 +121,48 @@ class Store {
         };
     }
     saveData() { localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data)); }
+
+    exportData() {
+        return JSON.stringify(this.data, null, 2);
+    }
+
+    importData(importedData) {
+        const emptyData = {
+            config: { saldoInicial: null, dataInicial: null },
+            planejamento: {},
+            planejamentoDiario: {},
+            receitas: [],
+            receitasFixas: [],
+            despesasFixas: [],
+            despesasVariaveis: [],
+            cartao: { faturaInicial: 0, vencimentoData: '', vencimento: '', diaFechamento: '', compras: [], faturasFechadas: [] },
+            investimentos: []
+        };
+
+        const safeData = importedData && typeof importedData === 'object' ? importedData : {};
+        const merged = {
+            ...emptyData,
+            ...safeData,
+            config: { ...emptyData.config, ...(safeData.config || {}) },
+            planejamento: safeData.planejamento && typeof safeData.planejamento === 'object' ? safeData.planejamento : {},
+            planejamentoDiario: safeData.planejamentoDiario && typeof safeData.planejamentoDiario === 'object' ? safeData.planejamentoDiario : {},
+            receitas: Array.isArray(safeData.receitas) ? safeData.receitas : [],
+            receitasFixas: Array.isArray(safeData.receitasFixas) ? safeData.receitasFixas : [],
+            despesasFixas: Array.isArray(safeData.despesasFixas) ? safeData.despesasFixas : [],
+            despesasVariaveis: Array.isArray(safeData.despesasVariaveis) ? safeData.despesasVariaveis : [],
+            cartao: {
+                ...emptyData.cartao,
+                ...(safeData.cartao || {}),
+                compras: Array.isArray(safeData.cartao?.compras) ? safeData.cartao.compras : [],
+                faturasFechadas: Array.isArray(safeData.cartao?.faturasFechadas) ? safeData.cartao.faturasFechadas : []
+            },
+            investimentos: Array.isArray(safeData.investimentos) ? safeData.investimentos : []
+        };
+
+        this.data = merged;
+        this.saveData();
+    }
+
     
     setConfig(saldoInicial, dataInicial) {
         this.data.config.saldoInicial = saldoInicial;
@@ -420,6 +462,25 @@ class App {
             });
         }
 
+        const exportBtn = document.getElementById('btn-exportar-dados');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportData());
+        }
+
+        const importBtn = document.getElementById('btn-importar-dados');
+        const importInput = document.getElementById('input-importar-dados');
+
+        if (importBtn && importInput) {
+            importBtn.addEventListener('click', () => importInput.click());
+
+            importInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                this.importDataFromFile(file);
+                e.target.value = '';
+            });
+        }
+
         document.getElementById('modal-container').addEventListener('click', (e) => {
             if (e.target.id === 'modal-container') {
                 // block closing onboarding
@@ -590,6 +651,63 @@ class App {
         }
         this.closeModal();
         this.render();
+    }
+
+
+    exportData() {
+        const json = this.store.exportData();
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const now = new Date();
+        const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `findash-dados-${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    importDataFromFile(file) {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            try {
+                const imported = JSON.parse(event.target.result);
+                this.store.importData(imported);
+
+                const configDate = this.store.data.config?.dataInicial;
+                if (configDate) {
+                    this.referenceDate = new Date((document.getElementById('global-date')?.value || configDate) + 'T12:00:00');
+                }
+
+                if (this.store.data.config?.saldoInicial === null) {
+                    this.openModal('onboarding');
+                } else {
+                    this.closeModal();
+
+                    const globalDateInput = document.getElementById('global-date');
+                    if (globalDateInput && this.referenceDate) {
+                        globalDateInput.value = this.referenceDate.toISOString().split('T')[0];
+                    }
+
+                    const projInput = document.getElementById('projecao-date');
+                    if (projInput && this.projectedDate) {
+                        projInput.value = this.projectedDate.toISOString().split('T')[0];
+                    }
+
+                    this.render();
+                    alert('Dados importados com sucesso!');
+                }
+            } catch (error) {
+                console.error('Erro ao importar dados:', error);
+                alert('Não foi possível importar o arquivo. Verifique se ele é um JSON exportado pelo FinDash.');
+            }
+        };
+
+        reader.readAsText(file);
     }
 
     updatePlanejamento(e) {
