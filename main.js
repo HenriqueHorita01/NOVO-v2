@@ -14,27 +14,43 @@ class App {
     }
 
     bindEvents() {
-        window.app = this; // Expose for inline onclick
+    window.app = this;
 
-        // Sidebar Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                e.target.classList.add('active');
-                
-                // In a real SPA we would hide/show sections. For simplicity we keep dashboard focused right now
-                // but we can extend this to hide/show #view-dashboard vs others.
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // ativa botão
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+
+            // pega qual view abrir
+            const view = item.getAttribute('data-view');
+
+            // esconde todas
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.style.display = 'none';
             });
-        });
 
-        // Close Modal
-        document.getElementById('modal-container').addEventListener('click', (e) => {
-            if (e.target.id === 'modal-container') {
-                this.closeModal();
+            // mostra a selecionada
+            const target = document.getElementById(`view-${view}`);
+            if (target) {
+                target.style.display = 'block';
             }
+
+            // atualiza título
+            const title = item.textContent.trim();
+            document.getElementById('page-title').textContent = title;
         });
-    }
+    });
+
+    // fechar modal
+    document.getElementById('modal-container').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-container') {
+            this.closeModal();
+        }
+    });
+}
 
     openModal(type) {
         const modalBody = document.getElementById('modal-body');
