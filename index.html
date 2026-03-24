@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinDash - Controle Financeiro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .cashflow-table th, .cashflow-table td { padding: 0.75rem; text-align: right; border-bottom: 1px solid var(--glass-border); white-space: nowrap; }
+        .cashflow-table th:first-child, .cashflow-table td:first-child { text-align: left; font-weight: 600; position: sticky; left: 0; background: #1e1e2d; }
+        .cashflow-table th { background: rgba(0,0,0,0.2); }
+        .cashflow-table tr:hover { background: rgba(255,255,255,0.05); }
+        .plan-input { width: 90px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px; border-radius: 4px; text-align: right; font-family: inherit; font-size:0.9rem;}
+        .plan-input:focus { outline:1px solid var(--primary); background: rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+    <!-- Background Animated Elements -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo">
+                <h2>Fin<span>Dash</span></h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-item active" data-view="dashboard">📊 Visão Geral</a></li>
+                <li><a href="#" class="nav-item" data-view="receitas">💰 Receitas</a></li>
+                <li><a href="#" class="nav-item" data-view="receitas-fixas">🔄 Rec. Fixas</a></li>
+                <li><a href="#" class="nav-item" data-view="despesas-fixas">📄 Desp. Fixas</a></li>
+                <li><a href="#" class="nav-item" data-view="despesas-variaveis">🛒 Desp. Variáveis</a></li>
+                <li><a href="#" class="nav-item" data-view="cartao">💳 Cartão de Crédito</a></li>
+                <li><a href="#" class="nav-item" data-view="investimentos">📈 Investimentos</a></li>
+                <li><a href="#" class="nav-item" data-view="planejamento-diario">📆 Plan. Diário</a></li>
+                <li><a href="#" class="nav-item" data-view="planejamento">📅 Plan. Mensal</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar glass-panel">
+                <div class="topbar-left">
+                    <h1 id="page-title">Visão Geral</h1>
+                </div>
+                <div class="topbar-right" style="display:flex; gap:1.5rem; align-items:center;">
+                    <div class="date-selector" style="display:flex; align-items:center; gap:0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem 1rem; border-radius:8px; border:1px solid var(--glass-border);">
+                        <h1 style="font-size: 1.2rem; margin:0;">FinDash <span style="font-weight:400; font-size:1rem; opacity:0.8; margin-left:10px;">| V5 Ledger</span></h1>
+                        <input type="date" id="global-date" style="background:transparent; border:none; color:var(--text-main); font-family:inherit; outline:none; font-weight:600; cursor:pointer;">
+                    </div>
+                    <div class="user-profile">
+                        <span class="user-greeting">Olá, Usuário</span>
+                        <div class="avatar">👨‍💻</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- VIEW: DASHBOARD -->
+            <div class="content-area view-section active" id="view-dashboard">
+                <!-- Main Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card glass-panel primary-card">
+                        <h3 id="label-saldo-disponivel">Saldo Disponível em</h3>
+                        <h2 id="saldo-disponivel">R$ 0,00</h2>
+                        <div class="metric-footer" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="indicator">Lim. Diário no Mês: <strong id="limite-diario">R$ 0,00</strong></span>
+                            <span class="indicator">Lim. Diário no Mês: <strong id="limite-diario-mes">R$ 0,00</strong></span>
+                            <div style="display:flex; align-items:center; gap:5px; background:rgba(0,0,0,0.2); padding:2px 8px; border-radius:8px;">
+                                <label style="font-size:0.7rem; color:rgba(255,255,255,0.7);">Saldo Base R$:</label>
+                                <input type="number" id="inline-saldo-base" step="0.01" style="width:70px; background:transparent; border:none; color:white; font-family:inherit; font-size:0.8rem; font-weight:bold; outline:none; text-align:right;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-card glass-panel info-card" style="margin-top: 15px;">
+                        <h5>💡 Limite Diário (Até a Fatura)</h5>
+                        <h2 id="limite-diario">R$ 0,00</h2>
+                        <p class="text-muted" style="font-size:0.8rem; margin-top:5px;" id="limite-diario-hint">Considera o valor reservado para pagamento da próxima fatura do cartão, garantindo que você não comprometa o dinheiro necessário para quitá-la.</p>
+                    </div>
+                    <div class="metric-card glass-panel info-card">
+                        <h3>Saldo Projetado (Visão Futura)</h3>
+                        <h2 id="saldo-projetado">R$ 0,00</h2>
+                        <div class="metric-footer" style="display:flex; align-items:center; gap:0.5rem;">
+                            <span>Projetar até:</span>
+                            <input type="date" id="projecao-date" style="background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; padding:0.2rem 0.5rem; border-radius:4px; font-family:inherit; font-size:0.8rem; cursor:pointer;" title="Escolha a data limite da projeção">
+                        </div>
+                    </div>
+                    <div class="metric-card glass-panel danger-card">
+                        <h3>Saldo Comprometido</h3>
+                        <h2 id="saldo-comprometido">R$ 0,00</h2>
+                        <div class="metric-footer text-muted" style="font-size: 0.75rem; line-height:1.4;">
+                            Total de Dívidas Futuras (<span id="total-dividas-abs" style="color:var(--danger)">R$ 0,00</span>)<br>menos Dinheiro Atual (<span id="total-dinheiro-abs" style="color:var(--success)">R$ 0,00</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lists & secondary metrics -->
+                <div class="dashboard-widgets">
+                    <div class="widget glass-panel">
+                        <div class="widget-header">
+                            <h3>💳 Cartão (Este Mês)</h3>
+                        </div>
+                        <h2 class="text-danger mb-4" id="fatura-atual">R$ 0,00</h2>
+                        <ul class="item-list" id="lista-fatura-atual">
+                            <!-- Items injected via JS -->
+                        </ul>
+                    </div>
+                    
+                    <div class="widget glass-panel">
+                        <div class="widget-header">
+                            <h2>💰 Receitas (Este Mês)</h2>
+                            <button class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;" onclick="window.app.openModal('receita')">+ Nova Receita</button>
+                        </div>
+                        <ul class="item-list" id="lista-receitas">
+                             <!-- Items injected via JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:1.5rem;">
+                    <!-- Investimentos Resumo -->
+                    <div class="card glass-panel flex-1">
+                        <div class="card-header">
+                            <h3><span style="font-size:1.2rem;margin-right:8px;">📈</span>Investimentos no Mês</h3>
+                            <button class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;" onclick="window.app.openModal('investimento')">+ Novo</button>
+                        </div>
+                        <ul class="item-list" id="lista-investimentos-dashboard"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: RECEITAS -->
+            <div class="content-area view-section" id="view-receitas" style="display: none;">
+                <div class="widget glass-panel" style="height: 100%;">
+                    <div class="widget-header">
+                        <h2>💰 Todas as Receitas</h2>
+                        <button class="btn btn-primary" onclick="window.app.openModal('receita')">+ Nova Receita</button>
+                    </div>
+                    <ul class="item-list" id="page-lista-receitas"></ul>
+                </div>
+            </div>
+
+            <!-- VIEW: RECEITAS FIXAS -->
+            <div class="content-area view-section" id="view-receitas-fixas" style="display: none;">
+                <div class="widget glass-panel" style="height: 100%;">
+                    <div class="widget-header">
+                        <h2>🔄 Receitas Fixas (Recorrentes)</h2>
+                        <button class="btn btn-primary" onclick="window.app.openModal('receita-fixa')">+ Nova Receita Fixa</button>
+                    </div>
+                    <ul class="item-list" id="page-lista-receitas-fixas"></ul>
+                </div>
+            </div>
+
+            <!-- VIEW: DESPESAS FIXAS -->
+            <div class="content-area view-section" id="view-despesas-fixas" style="display: none;">
+                <div class="widget glass-panel" style="height: 100%;">
+                    <div class="widget-header">
+                        <h2>📄 Despesas Fixas (Recorrentes)</h2>
+                        <button class="btn btn-primary" onclick="window.app.openModal('despesa-fixa')">+ Nova Despesa Fixa</button>
+                    </div>
+                    <ul class="item-list" id="page-lista-despesas-fixas"></ul>
+                </div>
+            </div>
+
+            <!-- VIEW: DESPESAS VARIAVEIS -->
+            <div class="content-area view-section" id="view-despesas-variaveis" style="display: none;">
+                <div class="widget glass-panel" style="height: 100%;">
+                    <div class="widget-header">
+                        <h2>🛒 Despesas Variáveis (Débito)</h2>
+                        <button class="btn btn-primary" onclick="window.app.openModal('despesa-variavel')">+ Nova Despesa Variável</button>
+                    </div>
+                    <ul class="item-list" id="page-lista-despesas-variaveis"></ul>
+                </div>
+            </div>
+
+            <!-- VIEW: CARTÃO DE CRÉDITO -->
+            <div class="content-area view-section" id="view-cartao" style="display:none;">
+                <div class="card glass-panel" style="margin-bottom:1.5rem;">
+                    <div class="card-header" style="flex-wrap: wrap; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                            <h2>💳 Histórico de Dívidas Antigas</h2>
+                        </div>
+                        <button class="btn btn-outline" style="border-color:var(--warning); color:var(--warning)" onclick="window.app.openModal('fatura-fechada')">+ Adicionar Dívida/Fatura Antiga</button>
+                    </div>
+                    <p class="text-muted mb-4">Adicione faturas já fechadas ou saldos das faturas passadas para serem pagos. Elas descontarão apenas no dia que você marcar.</p>
+                    <ul class="item-list" id="page-lista-faturas-fechadas"></ul>
+                </div>
+
+                <div class="card glass-panel">
+                    <div class="card-header" style="flex-wrap: wrap; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                            <h2>💳 Novas Compras no Cartão</h2>
+                            <button class="btn btn-outline" onclick="window.app.openModal('config-cartao')">⚙️ Regras do Cartão (Vencimento Geral)</button>
+                        </div>
+                        <button class="btn btn-primary" onclick="window.app.openModal('compra-cartao')">+ Nova Compra</button>
+                    </div>
+                    <p class="text-muted mb-4">Gerencie as novas compras feitas no crédito. Elas entram nas faturas correspondentes automaticamente perante as regras do cartão.</p>
+                    <h3 class="mb-4">Todas as Compras</h3>
+                    <ul class="item-list" id="page-lista-cartao"></ul>
+                </div>
+            </div>
+
+            <!-- VIEW: INVESTIMENTOS -->
+            <div class="content-area view-section" id="view-investimentos" style="display: none;">
+                <div class="widget glass-panel" style="height: 100%;">
+                    <div class="widget-header">
+                        <h2>📈 Seus Investimentos</h2>
+                        <button class="btn btn-primary" onclick="window.app.openModal('investimento')">+ Novo Investimento</button>
+                    </div>
+                    <h2 class="text-success mb-4" id="page-total-investido">R$ 0,00</h2>
+                    <ul class="item-list" id="page-lista-investimentos"></ul>
+                </div>
+            </div>
+
+            <!-- Modals Container -->
+            <div id="modal-container" class="modal-overlay hidden">
+                <div class="modal glass-panel">
+                    <div class="modal-header">
+                        <h3 id="modal-title">Novo Registro</h3>
+                        <button class="close-btn" onclick="window.app.closeModal()">&times;</button>
+                    </div>
+                    <div class="modal-body" id="modal-body">
+                        <!-- Default form structure to be updated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: PLANEJAMENTO DIÁRIO -->
+            <div class="content-area view-section" id="view-planejamento-diario" style="display:none;">
+                <div class="card glass-panel" style="overflow-x: auto;">
+                    <h2>📆 Planejamento Diário (Próximos 30 dias)</h2>
+                    <p class="text-muted" style="margin-bottom:1rem;">Acompanhamento tático dia a dia. Despesas fixas no crédito e novas compras no crédito aparecem com "( )" como informativos, indicando que serão transferidas pra aba do Cartão e descontadas apenas no dia do vencimento da Fatura.</p>
+                    <table class="cashflow-table" style="width:100%; min-width:1200px; border-collapse: collapse; font-size:0.9rem;">
+                        <thead>
+                            <tr id="pland-header"></tr>
+                        </thead>
+                        <tbody id="pland-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: PLANEJAMENTO -->
+            <div class="content-area view-section" id="view-planejamento" style="display:none;">
+                <div class="card glass-panel" style="overflow-x: auto;">
+                    <h2>📅 Planejamento Mensal de Fluxo de Caixa (Próximos 6 Meses)</h2>
+                    <p class="text-muted" style="margin-bottom:1rem;">Simule o futuro: saldos finais rolam progressivamente para o mês seguinte. Digite nos campos "Planejado" para testar gastos hipotéticos no débito.</p>
+                    <table class="cashflow-table" style="width:100%; min-width:800px; border-collapse: collapse; font-size:0.9rem;">
+                        <thead>
+                            <tr id="planejamento-header"></tr>
+                        </thead>
+                        <tbody id="planejamento-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+</body>
+</html>
