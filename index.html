@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -51,6 +52,13 @@
                         <h1 style="font-size: 1.2rem; margin:0;">FinDash <span style="font-weight:400; font-size:1rem; opacity:0.8; margin-left:10px;">| V5 Ledger</span></h1>
                         <input type="date" id="global-date" style="background:transparent; border:none; color:var(--text-main); font-family:inherit; outline:none; font-weight:600; cursor:pointer;">
                     </div>
+
+                    <div class="data-actions" style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+                        <button id="btn-exportar-dados" class="btn btn-outline" type="button" style="padding:0.5rem 0.8rem; font-size:0.85rem;">⬇️ Exportar dados</button>
+                        <button id="btn-importar-dados" class="btn btn-outline" type="button" style="padding:0.5rem 0.8rem; font-size:0.85rem;">⬆️ Importar dados</button>
+                        <input type="file" id="input-importar-dados" accept=".json,application/json" style="display:none;">
+                    </div>
+
                     <div class="user-profile">
                         <span class="user-greeting">Olá, Usuário</span>
                         <div class="avatar">👨‍💻</div>
